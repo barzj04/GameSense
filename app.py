@@ -27,15 +27,10 @@ h1, h2, h3, h4 {{ font-family: 'Barlow Condensed', sans-serif !important; color:
 h3 {{ font-size: 1.9rem !important; }}
 .gs-band {{ background: repeating-linear-gradient(90deg, {PITCH} 0 90px, {STRIPE} 90px 180px);
            border-radius: 6px; padding: 34px 40px 30px; color: {CHALK}; position: relative; overflow: hidden; }}
-.gs-band::after {{ content: ""; position: absolute; right: -70px; top: 50%; width: 220px; height: 220px;
-                  border: 3px solid rgba(255,255,255,.35); border-radius: 50%; transform: translateY(-50%); }}
 .gs-brand {{ font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 1.15rem; opacity: .85; }}
 .gs-head {{ font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 3.3rem; line-height: 1.02;
            margin: 6px 0 10px; max-width: 16ch; }}
-.gs-sub {{ font-size: 1.12rem; max-width: 62ch; opacity: .92; margin-bottom: 26px; }}
-.gs-finds {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; max-width: 980px; }}
-.gs-find {{ border-top: 3px solid {YELLOW}; padding-top: 10px; font-size: 1.02rem; line-height: 1.45; }}
-.gs-find b {{ font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 1.35rem; display: block; margin-bottom: 4px; }}
+.gs-sub {{ font-size: 1.12rem; max-width: 60ch; opacity: .92; margin: 0; }}
 .gs-note {{ color: {MUTED}; font-size: .95rem; }}
 .gs-big {{ font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 3.6rem; line-height: 1; color: {PITCH}; }}
 .stTabs [data-baseweb="tab-list"] {{ gap: 6px; border-bottom: 2px solid {LINE}; }}
@@ -44,11 +39,9 @@ h3 {{ font-size: 1.9rem !important; }}
 .stTabs [data-baseweb="tab-highlight"] {{ background: {PITCH}; height: 3px; }}
 footer, #MainMenu {{ visibility: hidden; }}
 @media (max-width: 800px) {{
-  .gs-finds {{ grid-template-columns: 1fr; gap: 18px; }}
-  .gs-head {{ font-size: 2.4rem; }}
+    .gs-head {{ font-size: 2.4rem; }}
   .gs-band {{ padding: 24px 20px; }}
-  .gs-band::after {{ display: none; }}
-}}
+  }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -124,19 +117,20 @@ st.markdown(f"""
 <div class="gs-band">
   <div class="gs-brand">GameSense</div>
   <div class="gs-head">Is he a great finisher, or just on a lucky run?</div>
-  <div class="gs-sub">We looked at {len(open_play):,} shots from {metrics['n_matches']:,} matches to find out
-  what really predicts goals, so clubs can sign the right players.</div>
-  <div class="gs-finds">
-    <div class="gs-find"><b>Good positions are a real skill</b>Players who get good chances keep getting them.
-      Players who score more than they should usually don't keep it up.</div>
-    <div class="gs-find"><b>Judge chances, not goals</b>To predict a player's future goals, look at the quality of
-      his chances, not his goal tally. It's {pt['error_reduction_pct']:.0f}% more accurate.</div>
-    <div class="gs-find"><b>Accurate and tested</b>Our model is almost as accurate as a paid industry model, and it
-      worked on World Cup and Euro matches it had never seen.</div>
-  </div>
+  <p class="gs-sub">We looked at {len(open_play):,} shots from {metrics['n_matches']:,} matches to find out
+  what really predicts goals, so clubs can sign the right players.</p>
 </div>
 """, unsafe_allow_html=True)
 
+st.write("")
+st.markdown("#### What we found")
+st.markdown(
+    f"- **Getting into good positions is a real skill.** Players who get good chances keep getting them. "
+    f"Players who score more than they should usually don't keep it up.\n"
+    f"- **Judge a player by his chances, not his goals.** Chance quality predicts future goals "
+    f"{pt['error_reduction_pct']:.0f}% more accurately than past goals do.\n"
+    f"- **The model holds up.** It's almost as accurate as a paid industry model, and it worked on World Cup "
+    f"and Euro matches it had never seen.")
 st.write("")
 st.markdown('<p class="gs-note"><b>Expected goals</b> = how likely a shot is to go in, from 0 to 1, based on '
             'thousands of similar shots. A penalty is about 0.75; a shot from the halfway line is close to 0.</p>',
