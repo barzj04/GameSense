@@ -1,0 +1,12 @@
+{
+  "alpha": 2980.94,
+  "n_players": 174,
+  "players_95pct_above_avg": 0,
+  "players_95pct_below_avg": 0,
+  "alpha_at_bound": true,
+  "split_half": {
+    "finishing_r": -0.137,
+    "shot_quality_r": 0.651,
+    "n_players": 134
+  }
+}
