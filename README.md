@@ -1,54 +1,57 @@
-# xG Scout
+# GameSense
 
 > TODO: one-sentence pitch in your own words.
 
-**Live demo:** TODO (Streamlit Cloud link)
+**Live app:** https://gamesense.streamlit.app (TODO: update once you rename the app URL)
 
-## Problem
-TODO: Clubs pay huge fees for strikers after one prolific season. But is "being a good finisher" a stable skill, or mostly variance? And which players and teams actually create good chances?
+## The problem
+TODO (your words): Clubs pay huge fees for strikers after one big season. But is a player scoring lots because he's a great finisher, or because he got lucky? Getting that wrong costs millions.
+
+## What we found
+1. **Getting into good positions is a real skill. Scoring more than expected is mostly luck.** We split each player's games into two random groups. Players with good chances in one group also had good chances in the other (score 0.67 out of 1). Players who out-scored their chances in one group didn't do it in the other (score −0.04, basically zero).
+2. **Chance quality predicts future goals better than past goals do.** Using the first half of a season to predict the second half (590 players), chance quality was 22% more accurate than goal tallies.
+3. **The model is accurate and works on new competitions.** It is almost as accurate as StatsBomb's paid model (0.814 vs 0.816). It learned only from club football and still predicted 254 goals at World Cup 2022 + Euro 2024, where 250 were actually scored.
+
+TODO: add one player story. Our 2015/16 "buy" list includes Edin Džeko (Roma, 6 goals from chances worth 12) and Romelu Lukaku (Everton, 17 from 21.5). Check how they did the next season before using this.
+
+## How it works (simple version)
+- **Expected goals (xG):** for every shot, the chance it goes in (0 to 1), learned from 41,000+ real shots. It looks at distance, angle, defenders in the way, the keeper's position, headers, pressure and more.
+- **Goals above expected:** actual goals minus expected goals. Positive means a player scored more than an average player would from the same chances.
+- **Luck check:** how likely an average finisher would match a player's record just by luck.
 
 ## Data
-StatsBomb Open Data (free, no login). Every shot includes location, body part, play pattern, and a **freeze frame**: the position of every player at the moment of the shot.
-- Default: 2015/16 Premier League, La Liga, Bundesliga, Serie A, Ligue 1 + Euro 2024 + World Cup 2022
-- Quick mode: 2015/16 Premier League (~9.8k shots)
+StatsBomb Open Data (free): 41,562 shots from 1,666 matches. That's the 2015/16 Premier League, La Liga, Serie A, Ligue 1 and part of the Bundesliga, plus World Cup 2022 and Euro 2024. Every shot comes with the positions of all players at that moment.
 
-## Method
-1. **Features:** distance, angle to goal, defenders inside the shot cone, keeper position, nearest defender, header, pressure, first-time shot, one-on-one, set-piece/counter context
-2. **xG models:** logistic regression vs LightGBM, evaluated on **held-out matches** (grouped split, so there is no leakage within a match); StatsBomb's commercial xG used as a benchmark. Penalties are handled separately (empirical conversion rate).
-3. **Out-of-fold xG:** every shot is scored by a model that never saw its match, so player and team analysis is not inflated.
-4. **Finishing skill:**
-   - Split-half repeatability (random match halves, 50 repeats)
-   - Empirical-Bayes Gamma-Poisson shrinkage: goals ~ Poisson(skill × xG), skill ~ Gamma(α, α)
-5. **Team shot selection:** share of low-value (< 0.05 xG) shots and the xG lost to them.
+## Method (technical)
+- Models: logistic regression and LightGBM, tested on matches held out from training (no match appears in both)
+- Every shot is scored by a model that never saw that match (5-fold, grouped by match)
+- Skill test: split-half correlation over 50 random splits, plus Gamma-Poisson empirical-Bayes shrinkage
+- Future test: first half of season → second half, forecast error compared
+- Generalisation: trained on club leagues, tested on international tournaments
+- Penalties use the real conversion rate and are left out of player comparisons
 
-## Results (TODO: update after your full run)
-| | Log loss | Brier | AUC |
+| Model | Accuracy (AUC) | Goals predicted | Actual goals |
 |---|---|---|---|
-| Constant baseline | 0.320 | 0.088 | 0.50 |
-| Logistic (ours) | 0.272 | 0.078 | 0.777 |
-| LightGBM (ours) | 0.274 | 0.078 | 0.772 |
-| StatsBomb xG (commercial) | 0.265 | 0.075 | 0.788 |
+| Guessing the average | 0.500 | 784 | 806 |
+| Our simple model | 0.810 | 788 | 806 |
+| Our main model | 0.814 | 786 | 806 |
+| StatsBomb's paid model | 0.816 | 764 | 806 |
+| Our model on World Cup + Euro | 0.797 | 254 | 250 |
 
-*(Quick-mode PL 2015/16 numbers)*
-
-**Headline finding:** shot quality is repeatable (split-half r ≈ 0.66); finishing over-performance is not (r ≈ −0.11).
-TODO: say this in your own words, plus one named player example.
-
-## What this means for a recruiter / coach
-TODO:
-- Recruit for chance *getting* (xG per shot × volume), not one hot finishing season
-- Coaching target: shot selection (see the Team tab)
-
-## Dashboard
-Shot map · xG calculator · Finishing scout · Team shot selection · Model diagnostics
+## Who it's for
+TODO (your words):
+- **Recruiters:** sign players who get good chances, not players on a hot streak (see "Players to watch")
+- **Coaches:** cut down on hopeful long shots (see "Team shooting habits")
+- **Fans and media:** check if a striker's form is likely to last
 
 ## Limitations
-TODO: no tracking data beyond freeze frames, mostly a single season per player, xG ignores shot placement (post-shot xG), 2015/16 data is older.
+TODO (your words): only shot data (no full tracking), mostly one season per player, doesn't measure where the shot was placed, club data is from 2015/16, Bundesliga coverage is partial.
 
-## Run it
+## Run it yourself
 ```bash
 pip install -r requirements.txt
-python -m src.load            # or: python -m src.load --quick
+python -m src.load        # downloads the data (~5 min); add --quick for Premier League only
+python -m src.names       # short player names
 python -m src.model
 python -m src.finishing
 streamlit run app.py

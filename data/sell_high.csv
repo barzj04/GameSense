@@ -1,0 +1,16 @@
+player,team,shots,goals,xg,goals_minus_xg,xg_per_shot,luck_check
+Hatem Ben Arfa,OGC Nice,87,12,6.495680874674839,5.504319125325161,0.07466299855948091,"Possibly skill, possibly luck"
+Sofiane Boufal,Lille,58,9,4.202530085506819,4.797469914493181,0.07245741526735895,"Possibly skill, possibly luck"
+James David Rodríguez Rubio,Real Madrid,39,7,2.3992210088080217,4.600778991191978,0.06151848740533389,"Possibly skill, possibly luck"
+Iñaki Williams Arthuer,Athletic Club,47,8,3.6000541986673915,4.399945801332608,0.07659689784398706,"Possibly skill, possibly luck"
+Mohamed Larbi,Gazélec Ajaccio,40,7,2.6975946414019245,4.302405358598076,0.06743986603504812,"Possibly skill, possibly luck"
+Jesús Joaquín Fernández Sáez de la Torre,Genoa,39,6,1.9846215836487522,4.015378416351248,0.05088773291407057,"Possibly skill, possibly luck"
+Miralem Pjanić,AS Roma,67,9,5.322526357665819,3.6774736423341814,0.07944069190545998,"Possibly skill, possibly luck"
+Dimitri Payet,West Ham United,69,9,5.427931716156376,3.572068283843624,0.07866567704574458,"Possibly skill, possibly luck"
+Alessandro Florenzi,AS Roma,48,7,3.5173097656502206,3.4826902343497794,0.0732772867843796,"Possibly skill, possibly luck"
+Roberto Soriano,Sampdoria,54,8,4.5313348148095,3.4686651851905,0.08391360768165741,"Possibly skill, possibly luck"
+Ronny Rodelin,Stade Malherbe Caen,76,10,6.583346533234493,3.4166534667655073,0.08662298070045385,Within normal luck
+Rachid Ghezzal,Lyon,55,8,4.61136266683648,3.38863733316352,0.08384295757884509,"Possibly skill, possibly luck"
+Nathan Redmond,Norwich City,53,6,2.8455029365497553,3.1544970634502447,0.053688734651882175,"Possibly skill, possibly luck"
+Yannis Salibur,Guingamp,78,7,3.9894798993801364,3.0105201006198636,0.05114717819718124,Within normal luck
+Emanuele Giaccherini,Bologna,46,7,3.9911170673070475,3.0088829326929525,0.08676341450667495,Within normal luck

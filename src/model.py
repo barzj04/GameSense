@@ -77,6 +77,15 @@ def main():
     make = make_logit if best_name == "logistic" else make_lgbm
     res["selected_model"] = best_name
 
+    # ---- generalisation: train on club leagues, test on international tournaments ----
+    intl = np_["competition"].isin(["FIFA World Cup", "UEFA Euro"])
+    if intl.any() and (~intl).any():
+        m = make().fit(X[~intl], y[~intl])
+        gen = scores(y[intl], m.predict_proba(X[intl])[:, 1])
+        gen["n_shots"] = int(intl.sum())
+        gen["note"] = "trained on club leagues only, tested on World Cup 2022 + Euro 2024"
+        res["generalisation_international"] = gen
+
     # ---- 2. out-of-fold xG for every shot (used for player/team analysis, no leakage) ----
     oof = np.zeros(len(np_))
     for a, b in GroupKFold(n_splits=5).split(X, y, g):

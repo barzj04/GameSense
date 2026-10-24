@@ -44,8 +44,72 @@ def player_table(shots: pd.DataFrame, min_shots: int = MIN_SHOTS):
     p["goals_minus_xg"] = p["goals"] - p["xg"]
     # chance an exactly-average finisher scores at least this many goals from this xG
     p["p_luck"] = stats.poisson.sf(p["goals"] - 1, p["xg"])
+    # chance an average finisher scores this few goals or fewer (for under-performers)
+    p["p_unlucky"] = stats.poisson.cdf(p["goals"], p["xg"])
+    p["luck_check"] = [luck_label(g, x, a, b) for g, x, a, b in
+                       zip(p["goals"], p["xg"], p["p_luck"], p["p_unlucky"])]
     p["xg_per_shot"] = p["xg"] / p["shots"]
     return p.sort_values("skill", ascending=False), alpha
+
+
+def luck_label(goals, xg, p_over, p_under) -> str:
+    """Plain-language verdict: could an exactly-average finisher produce this record by chance?"""
+    if goals >= xg:
+        if p_over < 0.01:
+            return "Hard to explain by luck"
+        if p_over < 0.10:
+            return "Possibly skill, possibly luck"
+        return "Within normal luck"
+    if p_under < 0.01:
+        return "Unusually unlucky / poor"
+    if p_under < 0.10:
+        return "Possibly unlucky"
+    return "Within normal luck"
+
+
+def predictive_test(shots: pd.DataFrame, min_each: int = 10) -> dict:
+    """Does past xG predict FUTURE goals better than past goals do?
+    For each player-season, order matches by date and split into first / second half.
+    Forecast second-half goals two ways, scaled by second-half shot volume:
+      goals-based: (first-half goals / shots) x second-half shots
+      xG-based:    (first-half xG    / shots) x second-half shots
+    """
+    s = shots[~shots["is_penalty"]]
+    key = ["player", "competition", "season"]
+    m = s[key + ["match_id", "date"]].drop_duplicates(key + ["match_id"]).sort_values("date")
+    m["rank"] = m.groupby(key).cumcount()
+    m["n"] = m.groupby(key)["match_id"].transform("size")
+    m["half"] = (m["rank"] >= m["n"] / 2).astype(int)
+    t = s.merge(m[key + ["match_id", "half"]], on=key + ["match_id"])
+    h = (t.groupby(key + ["half"]).agg(shots=("goal", "size"), goals=("goal", "sum"), xg=("xg", "sum"))
+          .unstack("half"))
+    h = h[(h["shots"] >= min_each).all(axis=1)]
+    s1, s2 = h[("shots", 0)], h[("shots", 1)]
+    g1, g2, x1 = h[("goals", 0)], h[("goals", 1)], h[("xg", 0)]
+    pred_goals = g1 / s1 * s2
+    pred_xg = x1 / s1 * s2
+    mae_g = float(np.mean(np.abs(pred_goals - g2)))
+    mae_x = float(np.mean(np.abs(pred_xg - g2)))
+    return {
+        "n_player_seasons": int(len(h)),
+        "r_past_goals_vs_future_goals": round(float(np.corrcoef(g1 / s1, g2 / s2)[0, 1]), 3),
+        "r_past_xg_vs_future_goals": round(float(np.corrcoef(x1 / s1, g2 / s2)[0, 1]), 3),
+        "mae_goals_based": round(mae_g, 3),
+        "mae_xg_based": round(mae_x, 3),
+        "error_reduction_pct": round(100 * (1 - mae_x / mae_g), 1),
+    }
+
+
+def shortlists(players: pd.DataFrame, min_shots: int = 30):
+    """Buy-low: get good chances, haven't converted (expect goals to rise).
+    Sell-high: average chances, finishing well above xG (expect goals to fall)."""
+    q = players[players["shots"] >= min_shots]
+    med = q["xg_per_shot"].median()
+    cols = ["player", "team", "shots", "goals", "xg", "goals_minus_xg", "xg_per_shot", "luck_check"]
+    buy = q[(q["xg_per_shot"] >= med) & (q["goals_minus_xg"] <= -2)].sort_values("xg", ascending=False)
+    sell = q[(q["xg_per_shot"] < med) & (q["goals_minus_xg"] >= 3)].sort_values("goals_minus_xg",
+                                                                                   ascending=False)
+    return buy[cols], sell[cols]
 
 
 def split_half(shots: pd.DataFrame, min_shots: int = MIN_SHOTS, seed: int = 0) -> dict:
@@ -100,12 +164,17 @@ def main():
     players, alpha = player_table(shots)
     teams = team_shot_selection(shots)
     players.to_csv("data/players.csv", index=False)
+    buy, sell = shortlists(players)
+    buy.to_csv("data/buy_low.csv", index=False)
+    sell.to_csv("data/sell_high.csv", index=False)
     teams.to_csv("data/teams.csv", index=False)
     summary = {"alpha": round(alpha, 2), "n_players": int(len(players)),
                "players_95pct_above_avg": int((players["p_above_avg"] > 0.95).sum()),
                "players_95pct_below_avg": int((players["p_above_avg"] < 0.05).sum()),
                "alpha_at_bound": bool(alpha > 2000),
-               "split_half": split_half(shots)}
+               "split_half": split_half(shots),
+               "predictive_test": predictive_test(shots),
+               "n_buy_low": int(len(buy)), "n_sell_high": int(len(sell))}
     with open("data/finishing.json", "w") as f:
         json.dump(summary, f, indent=2)
     print(json.dumps(summary, indent=2))

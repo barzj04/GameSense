@@ -1,12 +1,22 @@
 {
   "alpha": 2980.94,
-  "n_players": 174,
+  "n_players": 672,
   "players_95pct_above_avg": 0,
   "players_95pct_below_avg": 0,
   "alpha_at_bound": true,
   "split_half": {
-    "finishing_r": -0.137,
-    "shot_quality_r": 0.651,
-    "n_players": 134
-  }
+    "finishing_r": -0.035,
+    "shot_quality_r": 0.669,
+    "n_players": 517
+  },
+  "predictive_test": {
+    "n_player_seasons": 590,
+    "r_past_goals_vs_future_goals": 0.203,
+    "r_past_xg_vs_future_goals": 0.371,
+    "mae_goals_based": 1.532,
+    "mae_xg_based": 1.19,
+    "error_reduction_pct": 22.3
+  },
+  "n_buy_low": 42,
+  "n_sell_high": 15
 }
