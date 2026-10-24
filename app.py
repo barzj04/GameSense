@@ -9,7 +9,7 @@ import streamlit as st
 
 from src.features import FEATURES, GOAL_X, GOAL_Y
 
-st.set_page_config(page_title="xG Scout", layout="wide")
+st.set_page_config(page_title="ShotIQ", layout="wide")
 GOAL_C, MISS_C = "#e4572e", "#6c8ead"
 
 
@@ -48,7 +48,7 @@ def half_pitch(fig):
 shots, players, teams, calib, metrics, fin = load()
 sel = metrics["selected_model"]
 
-st.title("xG Scout")
+st.title("ShotIQ")
 st.caption("Who creates good chances, and who is just finishing hot? Built on StatsBomb open data.")
 
 c1, c2, c3, c4 = st.columns(4)
